@@ -12,7 +12,7 @@ Easy NotebookLM access for Jack Vidal's students. A Claude Code skill that wraps
 2. **Python 3.10 or newer** — check with `python --version`. Get it from [python.org](https://www.python.org/downloads/).
 3. **A Google account that already uses NotebookLM** at https://notebooklm.google.com.
 
-That's it. Total install time: ~3 minutes.
+You don't need to install anything else manually — the skill does the rest.
 
 ---
 
@@ -22,37 +22,25 @@ That's it. Total install time: ~3 minutes.
 npx skills add jackvidal/notebooklm-by-jack-vidal
 ```
 
-That single command downloads this skill and registers it with Claude Code. (Requires Node.js — install from [nodejs.org](https://nodejs.org/) if you don't have it.)
+That's it for setup. (Requires Node.js — install from [nodejs.org](https://nodejs.org/) if you don't have it.)
 
 **Don't have `npx`?** Manual install: download [`SKILL.md`](SKILL.md) from this repo and save it to:
 - macOS / Linux: `~/.claude/skills/notebooklm-by-jack-vidal/SKILL.md`
 - Windows: `%USERPROFILE%\.claude\skills\notebooklm-by-jack-vidal\SKILL.md`
 
-## Step 2 — Install the underlying CLI
+## Step 2 — Just talk to Claude Code
 
-```bash
-pip install "notebooklm-py[browser]"
-playwright install chromium
-```
-
-## Step 3 — Sign into your Google account
-
-Open Claude Code and just say:
+Open Claude Code and say:
 
 > Connect me to my NotebookLM.
 
-Claude will run the right login flow for you. A Chromium window will pop up — sign in with the Google account that owns your notebooks, and you're done. Subsequent sessions don't need this step.
+Claude does the rest:
 
-If you'd rather do it manually:
+1. **Installs the runtime** (`notebooklm-py` + Chromium for login) — ~2 minutes the first time, never again.
+2. **Opens a browser window** for you to sign in to Google. Pick the account that owns your notebooks.
+3. **Saves your session** so future requests don't need login.
 
-```bash
-notebooklm login --fresh
-# Sign into Google in the Chromium window
-# Wait until you see your NotebookLM home page
-# Switch back to the terminal and press ENTER
-```
-
-Verify with `notebooklm auth check --test` — all five rows should be ✓ pass.
+You'll see a couple of permission prompts the first time (for `pip install` and `playwright install`) — just approve them. After this one-time setup, you can talk to Claude in plain English about your notebooks forever.
 
 ---
 

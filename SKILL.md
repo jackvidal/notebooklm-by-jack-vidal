@@ -9,14 +9,53 @@ A friendly entry point to Google NotebookLM for Jack Vidal's students. Wraps the
 
 **What you get:** every NotebookLM feature (sources, chat, podcasts, videos, quizzes, flashcards, mind maps, slide decks, infographics, reports, web research) plus a few things the web UI doesn't expose (batch downloads, JSON/Markdown quiz export, mind map JSON, PPTX slides).
 
-## 1. One-time install
+## 1. First-time bootstrap (the agent runs this — students don't type anything)
+
+**On first activation, before doing anything else, the agent must verify the runtime is installed and install it if missing.** Students should never be told to run install commands manually — the agent does it for them.
+
+### Step 1.1 — Check whether the CLI is already installed
+
+Run this **silently** (don't ask the student first — it's read-only):
 
 ```bash
-pip install "notebooklm-py[browser]"
+notebooklm --version
+```
+
+- **Exit code 0 with a version string** → Skip to section 2 (Authentication). Do not reinstall.
+- **"command not found" / non-zero exit** → Continue with Step 1.2.
+
+### Step 1.2 — Install the CLI
+
+Tell the student: *"First time using this — installing the NotebookLM runtime (~1 minute)."* Then run (this is the one place to ask permission, since it modifies the Python environment):
+
+```bash
+python -m pip install "notebooklm-py[browser]"
+```
+
+Notes for the agent:
+- Use `python -m pip` not bare `pip` — survives PATH issues across Windows/macOS/Linux.
+- If `python` isn't found, try `python3 -m pip`. If neither works, stop and tell the student: *"Python 3.10+ is required. Install from https://python.org/downloads then re-run."*
+- If pip warns about externally-managed environment (Debian/Ubuntu/macOS Homebrew Python), retry with `python -m pip install --user "notebooklm-py[browser]"`.
+
+### Step 1.3 — Install the Chromium browser used for login
+
+Run (no student input needed — this is the runtime the auth flow will use):
+
+```bash
 playwright install chromium
 ```
 
-If you already have Python 3.10+ and pip, that's the whole install. (On Windows, run in PowerShell. On macOS/Linux, any terminal.)
+Tell the student: *"Downloading Chromium (~330 MB, takes 1–2 minutes on a normal connection)."* This step is required even if they have Chrome installed — Playwright uses its own bundled build.
+
+### Step 1.4 — Verify install succeeded
+
+```bash
+notebooklm --version
+```
+
+Should now print a version. If it doesn't, the entry point script isn't on PATH — fall back to invoking the module directly: `python -m notebooklm.cli` (substitute that for `notebooklm` in everything that follows). Tell the student to restart their terminal once after install so the PATH update takes effect for future sessions.
+
+Then continue to section 2.
 
 ## 2. Fast authentication
 
@@ -129,10 +168,15 @@ Invoke this skill when the student says any of:
 ## 6. Autonomy rules (for the AI agent using this skill)
 
 **Run automatically — no need to ask:**
+- `notebooklm --version` (silent install check)
+- `playwright install chromium` (after `pip install` — paired bootstrap step)
 - `auth check`, `auth check --test`, `status`, `list`, `source list`, `artifact list`, `language list`, `language get`, `history`
 - `notebooklm use <id>`, `create`, `source add`, `source add-research` (fast mode)
 - `ask "..."` without `--save-as-note`
 - The Path A/B login flow above when `auth check --test` fails
+
+**Tell the student before running, but don't wait for confirmation:**
+- `python -m pip install "notebooklm-py[browser]"` (modifies Python env, but is the explicit purpose of installing this skill — students who installed the skill expect this)
 
 **Confirm with the student first:**
 - `notebooklm delete` / `notebook delete` — destructive
